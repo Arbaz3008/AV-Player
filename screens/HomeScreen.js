@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, FlatList, Image, Alert, TextInput, Switch
+  View, Text, StyleSheet, TouchableOpacity, FlatList, Image, Alert, TextInput, Switch, ImageBackground
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
+
+// Import the background image
+const backgroundImage = require('../assets/arbaz.jpg');
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -109,40 +112,49 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={[styles.container, darkMode && styles.darkContainer]}>
-      <View style={styles.header}>
-        {currentFolder && (
-          <TouchableOpacity onPress={goBack}>
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
-        )}
-        <Text style={styles.headerText}>{currentFolder ? currentFolder.title : 'Music Player'}</Text>
-        <Switch value={darkMode} onValueChange={toggleDarkMode} />
+    <ImageBackground 
+      source={backgroundImage} 
+      style={styles.background}
+    >
+      <View style={[styles.container, darkMode && styles.darkContainer]}>
+        <View style={styles.header}>
+          {currentFolder && (
+            <TouchableOpacity onPress={goBack}>
+              <Text style={styles.backText}>Back</Text>
+            </TouchableOpacity>
+          )}
+          <Text style={styles.headerText}>{currentFolder ? currentFolder.title : 'Music Player'}</Text>
+          <Switch value={darkMode} onValueChange={toggleDarkMode} />
+        </View>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+        <FlatList
+          data={currentFolder ? songs : folders}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          style={styles.list}
+        />
       </View>
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search"
-        value={searchQuery}
-        onChangeText={handleSearch}
-      />
-      <FlatList
-        data={currentFolder ? songs : folders}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        style={styles.list}
-      />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover', // Ensure the background image covers the entire screen
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: 'rgba(247, 247, 247, 0.8)', // Add transparency to see the background image
     padding: 10,
   },
   darkContainer: {
-    backgroundColor: '#333',
+    backgroundColor: 'rgba(51, 51, 51, 0.8)', // Add transparency to dark mode background
   },
   header: {
     flexDirection: 'row',
