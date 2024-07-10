@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Alert , TextInput} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Alert, TextInput } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Audio } from 'expo-av';
 import { Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider } from 'react-native-popup-menu';
@@ -27,12 +27,11 @@ const PlaybackScreen = ({ route }) => {
   const [repeat, setRepeat] = useState(false);
   const [shuffle, setShuffle] = useState(false);
   const [sound, setSound] = useState(null);
-  const [queue, setQueue] = useState([initialSong]);
+  const [queue, setQueue] = useState([initialSong]); // Initialize queue with the initial song
   const [currentQueueIndex, setCurrentQueueIndex] = useState(0);
   const [offline, setOffline] = useState(false);
   const [sleepTimer, setSleepTimer] = useState(null);
   const [customTime, setCustomTime] = useState('');
-
 
   // Load and play the initial song
   useEffect(() => {
@@ -95,37 +94,37 @@ const PlaybackScreen = ({ route }) => {
   };
 
   // Handle next song in queue
-  const handleNext = () => {
+  const handleNext = async () => {
     if (shuffle) {
       const nextIndex = Math.floor(Math.random() * queue.length);
       setCurrentQueueIndex(nextIndex);
     } else {
       setCurrentQueueIndex((prevIndex) => (prevIndex + 1) % queue.length);
     }
-    playSong(queue[currentQueueIndex]);
+    await playSong(queue[currentQueueIndex]);
   };
 
   // Handle previous song in queue
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
     setCurrentQueueIndex((prevIndex) => (prevIndex - 1 + queue.length) % queue.length);
-    playSong(queue[currentQueueIndex]);
+    await playSong(queue[currentQueueIndex]);
   };
 
   // Play selected song
-  const playSong = async (song) => {
+  const playSong = async (selectedSong) => {
     if (sound) {
       await sound.unloadAsync();
     }
     const { sound: newSound } = await Audio.Sound.createAsync(
-      { uri: song.uri },
+      { uri: selectedSong.uri },
       { shouldPlay: true }
     );
     setSound(newSound);
     setSong({
-      title: song.filename,
-      artist: song.artist || 'Unknown Artist',
-      artwork: song.uri,
-      duration: song.duration ? song.duration / 1000 : 0,
+      title: selectedSong.filename,
+      artist: selectedSong.artist || 'Unknown Artist',
+      artwork: selectedSong.uri,
+      duration: selectedSong.duration ? selectedSong.duration / 1000 : 0,
       currentTime: 0,
     });
     setPlaybackStatus('playing');
@@ -145,18 +144,20 @@ const PlaybackScreen = ({ route }) => {
   const handleShuffle = () => {
     setShuffle((prevShuffle) => !prevShuffle);
   };
-
+  const handleSleepTimer = (time) => {
+    // Implement the logic to set the sleep timer
+  };
+  
   const handleCustomTimeChange = (text) => {
     setCustomTime(text);
   };
-  
+
   const handleCustomTimeSubmit = () => {
     const time = parseInt(customTime);
     if (time > 0) {
       handleSleepTimer(time);
     }
   };
-  
 
   // Handle download for offline
   const handleDownloadOffline = () => {
@@ -239,22 +240,22 @@ const PlaybackScreen = ({ route }) => {
                 <Text style={styles.menuOptionText}>{offline ? 'Remove Download' : 'Download'}</Text>
               </MenuOption>
               <MenuOptions>
-    <MenuOption onSelect={() => handleSleepTimer(30)}>
-      <Text>30 minutes</Text>
-    </MenuOption>
-    <MenuOption onSelect={() => handleSleepTimer(60)}>
-      <Text>1 hour</Text>
-    </MenuOption>
-    <MenuOption>
-      <TextInput
-        style={styles.textInput}
-        placeholder="Enter custom time"
-        value={customTime}
-        onChangeText={handleCustomTimeChange}
-        onSubmitEditing={handleCustomTimeSubmit}
-      />
-    </MenuOption>
-    </MenuOptions>
+                <MenuOption onSelect={() => handleSleepTimer(30)}>
+                  <Text>30 minutes</Text>
+                </MenuOption>
+                <MenuOption onSelect={() => handleSleepTimer(60)}>
+                  <Text>1 hour</Text>
+                </MenuOption>
+                <MenuOption>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter custom time"
+                    value={customTime}
+                    onChangeText={handleCustomTimeChange}
+                    onSubmitEditing={handleCustomTimeSubmit}
+                  />
+                </MenuOption>
+              </MenuOptions>
             </MenuOptions>
           </Menu>
         </View>
